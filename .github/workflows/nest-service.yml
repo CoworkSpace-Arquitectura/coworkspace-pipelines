@@ -1,0 +1,77 @@
+name: Pipeline de microservicio NestJS
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: Nombre del microservicio
+        type: string
+        required: true
+      node-version:
+        type: string
+        default: '24'
+    secrets:
+      RENDER_DEPLOY_HOOK_URL:
+        required: false
+
+jobs:
+  test:
+    name: Lint, build y pruebas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: npm
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+
+  docker:
+    name: Construir y publicar imagen
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nombre de la imagen en minúsculas
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+
+  deploy:
+    name: Desplegar en Render
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar el deploy hook
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::RENDER_DEPLOY_HOOK_URL no está configurado; se omite el despliegue de ${{ inputs.service-name }}."
+            exit 0
+          fi
+          curl -fsS -X POST "$HOOK"
+          echo "Despliegue de ${{ inputs.service-name }} solicitado a Render."
