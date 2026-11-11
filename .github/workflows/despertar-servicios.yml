@@ -1,0 +1,34 @@
+name: Despertar servicios
+
+on:
+  workflow_dispatch:
+
+jobs:
+  wake:
+    name: Despertar los servicios de Render
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar a cada servicio hasta que responda
+        run: |
+          for url in \
+            https://coworkspace-space.onrender.com/ \
+            https://coworkspace-membership.onrender.com/ \
+            https://coworkspace-access.onrender.com/ \
+            https://coworkspace-booking.onrender.com/ \
+            https://coworkspace-billing.onrender.com/ \
+            https://coworkspace-currency.onrender.com/ \
+            https://coworkspace-gateway.onrender.com/api
+          do
+            (
+              for intento in 1 2 3 4 5 6; do
+                code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "$url")
+                echo "$url → $code (intento $intento)"
+                if [ "$code" = "200" ]; then break; fi
+                sleep 10
+              done
+            ) &
+          done
+          wait
+
+      - name: Estado final según el Gateway
+        run: curl -s --max-time 60 https://coworkspace-gateway.onrender.com/api/health
