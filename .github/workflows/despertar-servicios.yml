@@ -19,6 +19,7 @@ jobs:
             https://coworkspace-currency.onrender.com/ \
             https://coworkspace-notification.onrender.com/ \
             https://coworkspace-community-latest.onrender.com/ \
+            https://coworkspace-analytics.onrender.com/ \
             https://coworkspace-gateway.onrender.com/api
           do
             (
