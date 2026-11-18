@@ -8,7 +8,7 @@
   ],
   "timezone": "browser",
   "schemaVersion": 41,
-  "version": 1,
+  "version": 2,
   "refresh": "10s",
   "time": {
     "from": "now-30m",
@@ -216,7 +216,9 @@
             "fillOpacity": 10,
             "showPoints": "never",
             "spanNulls": true
-          }
+          },
+          "min": 0,
+          "max": 100
         },
         "overrides": []
       },
@@ -357,7 +359,7 @@
     {
       "id": 8,
       "title": "Tasa de errores 5xx",
-      "description": "Porcentaje de respuestas con error del servidor.",
+      "description": "Porcentaje de respuestas con error del servidor (5xx). 0 % significa que no hubo errores.",
       "type": "timeseries",
       "datasource": {
         "type": "prometheus",
@@ -376,7 +378,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "(sum by (job) (rate(http_requests_total{status_code=~\"5..\"}[5m])) / sum by (job) (rate(http_requests_total[5m]))) * 100",
+          "expr": "100 * (sum by (job) (rate(http_requests_total{status_code=~\"5..\"}[5m])) or (sum by (job) (rate(http_requests_total[5m])) * 0)) / sum by (job) (rate(http_requests_total[5m]))",
           "legendFormat": "{{job}}"
         }
       ],
@@ -388,7 +390,8 @@
             "fillOpacity": 10,
             "showPoints": "never",
             "spanNulls": true
-          }
+          },
+          "min": 0
         },
         "overrides": []
       },
@@ -625,7 +628,7 @@
     {
       "id": 14,
       "title": "Reservas por estado",
-      "description": "",
+      "description": "Aparece al crear la primera reserva después del último despliegue de Booking.",
       "type": "piechart",
       "datasource": {
         "type": "prometheus",
@@ -669,7 +672,7 @@
     {
       "id": 15,
       "title": "Pagos con Stripe",
-      "description": "paid = aprobados, failed = fallidos o cancelados, refunded = reembolsados.",
+      "description": "paid = aprobados, failed = fallidos o cancelados, refunded = reembolsados. Aparece con el primer pago después del último despliegue de Billing.",
       "type": "bargauge",
       "datasource": {
         "type": "prometheus",
