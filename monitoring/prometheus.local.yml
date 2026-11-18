@@ -1,0 +1,38 @@
+# Variante para correr los microservicios en tu PC (npm run start:dev) en vez de Render.
+global:
+  scrape_interval: 15s
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: space
+    static_configs:
+      - targets: ['host.docker.internal:3001']
+  - job_name: membership
+    static_configs:
+      - targets: ['host.docker.internal:3002']
+  - job_name: access
+    static_configs:
+      - targets: ['host.docker.internal:3003']
+  - job_name: booking
+    static_configs:
+      - targets: ['host.docker.internal:3004']
+  - job_name: billing
+    static_configs:
+      - targets: ['host.docker.internal:3005']
+  - job_name: currency
+    static_configs:
+      - targets: ['host.docker.internal:3009']
+  - job_name: notification
+    static_configs:
+      - targets: ['host.docker.internal:3007']
+  - job_name: community
+    static_configs:
+      - targets: ['host.docker.internal:3006']
+  - job_name: analytics
+    static_configs:
+      - targets: ['host.docker.internal:3008']
+  - job_name: gateway
+    static_configs:
+      - targets: ['host.docker.internal:3000']

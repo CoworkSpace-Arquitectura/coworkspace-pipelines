@@ -1,0 +1,62 @@
+# Prometheus para CoworkSpace
+# Consulta cada 15 s la ruta /metrics de los 10 microservicios desplegados en Render.
+# Si un servicio no responde, la métrica up vale 0 y se dispara la alerta ServicioCaido.
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+
+rule_files:
+  - alerts.yml
+
+scrape_configs:
+  - job_name: space
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-space.onrender.com']
+  - job_name: membership
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-membership.onrender.com']
+  - job_name: access
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-access.onrender.com']
+  - job_name: booking
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-booking.onrender.com']
+  - job_name: billing
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-billing.onrender.com']
+  - job_name: currency
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-currency.onrender.com']
+  - job_name: notification
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-notification.onrender.com']
+  - job_name: community
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-community-latest.onrender.com']
+  - job_name: analytics
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-analytics.onrender.com']
+  - job_name: gateway
+    scheme: https
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['coworkspace-gateway.onrender.com']

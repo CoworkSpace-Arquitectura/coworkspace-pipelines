@@ -1,0 +1,30 @@
+# Reglas de alerta que Prometheus evalúa cada 15 s (se ven en http://localhost:9090/alerts)
+groups:
+  - name: coworkspace
+    rules:
+      - alert: ServicioCaido
+        expr: up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: '{{ $labels.job }} no responde a Prometheus'
+
+      - alert: MuchosErrores
+        expr: >-
+          sum by (job) (rate(http_requests_total{status_code=~"5.."}[5m]))
+          / sum by (job) (rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.job }} tiene más del 5 % de respuestas con error 5xx'
+
+      - alert: RespuestaLenta
+        expr: >-
+          histogram_quantile(0.95, sum by (le, job) (rate(http_request_duration_seconds_bucket[5m]))) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'El 5 % más lento de las peticiones de {{ $labels.job }} tarda más de 2 s'

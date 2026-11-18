@@ -1,0 +1,8 @@
+# Carga los dashboards de la carpeta /var/lib/grafana/dashboards
+apiVersion: 1
+providers:
+  - name: CoworkSpace
+    folder: CoworkSpace
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

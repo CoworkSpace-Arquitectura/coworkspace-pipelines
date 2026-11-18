@@ -1,0 +1,28 @@
+# Prometheus + Grafana para la demostración. Se ejecuta en un PC, no se despliega.
+#   docker compose up -d
+#   Prometheus: http://localhost:9090   (Status > Targets: los 10 servicios en UP)
+#   Grafana:    http://localhost:3000   (usuario admin / clave admin)
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: coworkspace-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alerts.yml:/etc/prometheus/alerts.yml:ro
+    ports: ['9090:9090']
+    extra_hosts: ['host.docker.internal:host-gateway']
+
+  grafana:
+    image: grafana/grafana:12.1.1
+    container_name: coworkspace-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ['3000:3000']
+    depends_on: [prometheus]
